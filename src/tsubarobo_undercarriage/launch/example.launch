@@ -1,0 +1,18 @@
+<launch>
+
+  <node pkg="joy" exec="joy_node" name="joy_node">
+  </node>
+
+  <node pkg="tsubarobo_undercarriage" exec="tsubarobo_undercarriage" name="undercarriage">
+  </node>
+
+  <node pkg="robomas_driver" exec="robomas_driver" name="robomaster_ros2_ctrl">
+  </node>
+
+  <!-- <node pkg="upper" exec="upper" name="upper">
+  </node> -->
+
+  
+  <!-- <include file="$(find-pkg-share robomas_driver)/launch/robomas_bridge_launch.xml"/> -->
+
+</launch>
