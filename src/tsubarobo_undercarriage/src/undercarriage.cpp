@@ -53,7 +53,7 @@ private:
 /////////////////////////////ここの下からは、上で決めたターゲットをシラスに向かって送ってあげる関数
 
 
-  robomas_pub_1->publish(*(this->tsubarobo_undercarriage.make_robomas_Frame()));
+  robomas_pub_1->publish(this->tsubarobo_undercarriage.make_robomas_Frame());
 
   //////////////////////////////////////////////////////////////////////
 

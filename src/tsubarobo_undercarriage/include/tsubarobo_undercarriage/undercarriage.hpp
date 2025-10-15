@@ -71,10 +71,11 @@ class undercarriage{
     motor motors[3];//right_front_motor,left_front_motor,back_motor
     //四輪オムニ    
     motor_mode MODE;
+    rclcpp::Logger logger_;
     public:
     
     undercarriage()
-    :direction(FRY::vec2d(0,0)),motors{motor(cos30,sin30),motor(-cos30,sin30),motor(0,-1)}
+    :direction(FRY::vec2d(0,0)),motors{motor(cos30,sin30),motor(-cos30,sin30),motor(0,-1)},logger_(rclcpp::get_logger("undercarriage"))
     {
         MODE = motor_mode::disable;
     }//初期化
@@ -94,15 +95,17 @@ inline std::unique_ptr<robomas_driver::msg::MotorCmdArray> undercarriage::make_r
     robomas_driver::msg::MotorCmdArray TARGET_FRAME;
     uint8_t i = 0;
     for(motor m : this->motors){
-        TARGET_FRAME.cmds[i].id = i+1;
-        TARGET_FRAME.cmds[i].type = "M3508";
-        TARGET_FRAME.cmds[i].value = m.make_frame();
+        robomas_driver::msg::MotorCmd cmd;
+        cmd.id = i + 1;
+        cmd.type = "M3508";
+        cmd.value = m.make_frame();
         if(this->MODE == motor_mode::velocity){
-            TARGET_FRAME.cmds[i].mode = 1;
+            cmd.mode = 1;
         }
         else if(this->MODE == motor_mode::disable){
-            TARGET_FRAME.cmds[i].mode = 0;
+            cmd.mode = 0;
         }
+        TARGET_FRAME.cmds.push_back(cmd);
         i++;
     }
     
