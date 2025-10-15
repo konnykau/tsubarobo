@@ -22,14 +22,15 @@ class motor{
     const FRY::vec2d direction;//モーターの向いている方向ベクトル
     float TARGET;//TARGET
     // float LAST_TARGET; 
-
+    rclcpp::Logger logger_;
     public:
     motor(float x,float y)
-    :direction(FRY::vec2d(x,y)),TARGET(0)
+    :direction(FRY::vec2d(x,y)),TARGET(0),logger_(rclcpp::get_logger("motor"))
     {}//初期化
     void set_target(float power,double dt){
         if(std::fabs(power) > max_velocity_){
             power = max_velocity_ * (power > 0 ? 1 : -1);
+            RCLCPP_WARN(logger_,"%f , %f vector motor power over max_velocity_",this->direction.x,this->direction.y);
         }
         float velocity_difference = power - this->TARGET;
         float max_velocity_change = max_acceleration_ * dt;
@@ -39,6 +40,7 @@ class motor{
             
         } else {
             power = (velocity_difference > 0 ? 1 : -1) * max_velocity_change + this->TARGET;
+            RCLCPP_WARN(logger_,"%f , %f vector motor acceleration over max_acceleration_",this->direction.x,this->direction.y);
         }
         // this->LAST_TARGET = (this->TARGET);
         this->TARGET = power;
@@ -75,7 +77,7 @@ class undercarriage{
     public:
     
     undercarriage()
-    :direction(FRY::vec2d(0,0)),motors{motor(cos30,sin30),motor(-cos30,sin30),motor(0,-1)},logger_(rclcpp::get_logger("undercarriage"))
+    :direction(FRY::vec2d(0,0)),motors{motor(sin30,cos30),motor(-sin30,cos30),motor(-1,0)},logger_(rclcpp::get_logger("undercarriage"))
     {
         MODE = motor_mode::disable;
     }//初期化
@@ -98,16 +100,18 @@ inline std::unique_ptr<robomas_driver::msg::MotorCmdArray> undercarriage::make_r
         robomas_driver::msg::MotorCmd cmd;
         cmd.id = i + 1;
         cmd.type = "M3508";
-        cmd.value = m.make_frame();
+        cmd.mode = 1;
         if(this->MODE == motor_mode::velocity){
-            cmd.mode = 1;
+            cmd.value = m.make_frame();
         }
-        else if(this->MODE == motor_mode::disable){
-            cmd.mode = 0;
+        else{// if(this->MODE == motor_mode::disable)
+            cmd.value = 0;
         }
+        RCLCPP_INFO(logger_,"motor id:%d, value:%f",cmd.id,cmd.value);
         TARGET_FRAME.cmds.push_back(cmd);
         i++;
     }
+    RCLCPP_INFO(logger_,"-------------------");
     
     return std::make_unique<robomas_driver::msg::MotorCmdArray>(TARGET_FRAME);
 }
@@ -115,19 +119,19 @@ inline std::unique_ptr<robomas_driver::msg::MotorCmdArray> undercarriage::make_r
 
 
 inline void undercarriage::set_motor_power(turn_direction turn_dir,double dt){
-    constexpr float MAX_OF_TARGET = 100.0;
-    constexpr float TURN_TARGET = 20;
+    constexpr float MAX_OF_TARGET = 300.0;
+    constexpr float TURN_TARGET = 100;
     //多分TARGETの最大値になるはず
     float TURN_POWER = 0;
 
     if(turn_dir == turn_direction::left_turn){
-        TURN_POWER = -TURN_TARGET;
+        TURN_POWER -= TURN_TARGET;
     }
     else if(turn_dir == turn_direction::right_turn){
-        TURN_POWER = TURN_TARGET;
+        TURN_POWER += TURN_TARGET;
     }
     uint8_t i = 0;
-    for(motor m : motors){
+    for(motor &m : motors){
         float power = (this->direction * m.get_vec2d()) * MAX_OF_TARGET;
         m.set_target(power + TURN_POWER,dt);
         i++;        

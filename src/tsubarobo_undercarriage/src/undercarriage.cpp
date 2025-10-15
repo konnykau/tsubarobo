@@ -50,9 +50,7 @@ private:
     else{
         this->tsubarobo_undercarriage.update(-msg.axes[0],msg.axes[1],turn_direction::no_turn,dt);
     }//平行移動//x軸はjoyの入力時点で反転していた
-/////////////////////////////ここの下からは、上で決めたターゲットをシラスに向かって送ってあげる関数
-
-
+/////////////////////////////
   robomas_pub_1->publish(this->tsubarobo_undercarriage.make_robomas_Frame());
 
   //////////////////////////////////////////////////////////////////////
