@@ -77,7 +77,7 @@ class undercarriage{
     public:
     
     undercarriage()
-    :direction(FRY::vec2d(0,0)),motors{motor(sin30,cos30),motor(-sin30,cos30),motor(-1,0)},logger_(rclcpp::get_logger("undercarriage"))
+    :direction(FRY::vec2d(0,0)),motors{motor(sin30,cos30),motor(sin30,-cos30),motor(-1,0)},logger_(rclcpp::get_logger("undercarriage"))
     {
         MODE = motor_mode::disable;
     }//初期化
