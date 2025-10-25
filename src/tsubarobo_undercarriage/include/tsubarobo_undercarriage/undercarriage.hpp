@@ -6,10 +6,6 @@
 #include "robomas_driver/msg/motor_cmd_array.hpp"
 #include <cstdint>
 
-namespace constant{
-    
-}
-
 
 constexpr float cos30 = FRY::sqrt(3)/2;
 constexpr float sin30 = 0.5;
@@ -59,7 +55,7 @@ class motor{
 
 enum class turn_direction{left_turn, no_turn, right_turn};//回転するかしないか
 enum class motor_name{right_front_motor, left_front_motor,back_motor};//モーターの名前
-enum class motor_mode{disable,velocity};
+enum class motor_mode{disable,velocity,position};//モーターのmode
 
 
 class undercarriage{
@@ -71,6 +67,7 @@ class undercarriage{
     // motor back_motor;
 
     motor motors[3];//right_front_motor,left_front_motor,back_motor
+    uint8_t id_[3] = {1,2,3};
     //四輪オムニ    
     motor_mode MODE;
     rclcpp::Logger logger_;
@@ -98,7 +95,7 @@ inline std::unique_ptr<robomas_driver::msg::MotorCmdArray> undercarriage::make_r
     uint8_t i = 0;
     for(motor m : this->motors){
         robomas_driver::msg::MotorCmd cmd;
-        cmd.id = i + 1;
+        cmd.id = this->id_[i];
         cmd.type = "M3508";
         cmd.mode = 1;
         if(this->MODE == motor_mode::velocity){

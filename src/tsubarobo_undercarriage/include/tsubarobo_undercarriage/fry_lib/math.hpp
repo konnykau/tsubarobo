@@ -1,3 +1,4 @@
+#pragma once
 namespace FRY{
     template <typename T>
     constexpr float sqrt(T x){

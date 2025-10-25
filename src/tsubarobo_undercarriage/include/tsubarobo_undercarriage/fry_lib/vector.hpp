@@ -1,3 +1,4 @@
+#pragma once
 namespace FRY{
     struct vec2d{
         float x;
