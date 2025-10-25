@@ -13,9 +13,14 @@ find_package(ament_cmake REQUIRED)
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rosidl_default_generators REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(robomas_driver REQUIRED)
 
+rosidl_generate_interfaces(${PROJECT_NAME}
+  "msg/VelocityVector.msg"
+  DEPENDENCIES std_msgs
+)
 
 include_directories(
   include
@@ -24,6 +29,7 @@ include_directories(
 
 add_executable(undercarriage src/undercarriage.cpp)
 ament_target_dependencies(undercarriage rclcpp sensor_msgs robomas_driver)
+rosidl_target_interfaces(undercarriage ${PROJECT_NAME} "rosidl_typesupport_cpp")
 
 ament_export_include_directories(include)
 
@@ -47,5 +53,7 @@ if(BUILD_TESTING)
   set(ament_cmake_cpplint_FOUND TRUE)
   ament_lint_auto_find_test_dependencies()
 endif()
+
+ament_export_dependencies(rosidl_default_runtime)
 
 ament_package()
