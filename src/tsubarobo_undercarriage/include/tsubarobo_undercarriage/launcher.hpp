@@ -5,8 +5,8 @@
 #include "robomas_driver/msg/motor_cmd_array.hpp"
 #include <cstdint>
 
-constexpr float launcher_max_acceleration_ = 500.0;//to do
-constexpr float rolling_velocity_ = 900.0;//to do
+// constexpr float launcher_max_acceleration_ = 500.0;//to do
+constexpr float rolling_velocity_ = 40000.0;//to do
 
 class launcher{
     private:
@@ -22,7 +22,7 @@ class launcher{
         for(uint8_t i = 0;i < 2;i++){
             robomas_driver::msg::MotorCmd cmd;
             cmd.id = this->id_[i];
-            cmd.type = "M3508";
+            cmd.type = "LAUNCHER";
             cmd.mode = 1;
             if(this->MODE == motor_mode::disable){
                 cmd.value = 0;
@@ -59,9 +59,6 @@ class launcher{
     {}//初期化
 
     void set_target(float power,double dt){
-        if(std::fabs(power) > launcher_max_acceleration_ * dt){
-            power = max_acceleration_ * (power > 0 ? 1 : -1);
-        }
         this->TARGET = power;
     }//TARGETを代入
     
@@ -82,8 +79,8 @@ class launcher{
 
 };
 
-constexpr float pos_angle_a_ = 0.0;//to do
-constexpr float pos_angle_b_ = 1.0;//to do
+constexpr float pos_angle_a_ = 245.0;//to do
+constexpr float pos_angle_b_ = 0.0;//to do
 
 class loading_mechanism{
     private:

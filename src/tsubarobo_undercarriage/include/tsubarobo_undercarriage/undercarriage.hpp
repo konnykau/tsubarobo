@@ -10,8 +10,8 @@
 constexpr float cos30 = FRY::sqrt(3)/2;
 constexpr float sin30 = 0.5;
 
-constexpr float max_acceleration_ = 500.0;//to do
-constexpr float max_velocity_ = 900.0;//to do
+constexpr float max_acceleration_ = 3000.0;//to do
+constexpr float max_velocity_ = 5000.0;//to do
 
 class motor{
     private:
@@ -116,8 +116,8 @@ inline std::unique_ptr<robomas_driver::msg::MotorCmdArray> undercarriage::make_r
 
 
 inline void undercarriage::set_motor_power(turn_direction turn_dir,double dt){
-    constexpr float MAX_OF_TARGET = 300.0;
-    constexpr float TURN_TARGET = 100;
+    constexpr float MAX_OF_TARGET = 3000.0;
+    constexpr float TURN_TARGET = 1000;
     //多分TARGETの最大値になるはず
     float TURN_POWER = 0;
 

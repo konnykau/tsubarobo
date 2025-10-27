@@ -34,13 +34,13 @@ static constexpr int   CAN_ID_TX_1_4 = 0x200;        // ID1-4へ電流コマン�
 static constexpr int   CAN_ID_TX_5_8 = 0x1FF;        // ID5-8へ電流コマンド
 // フィードバックは 0x201..0x208
 
-static constexpr int16_t CMD_CURR_MAX = 15000;      // 安全上限
+static constexpr int16_t CMD_CURR_MAX = 20000;      // 安全上限
 static constexpr float AMP_TO_CMD = 800.0f;         // 1A -> 約800cmd（要実機調整）
 
 static inline float rpm_to_rev(float rpm) { return rpm / 60.0f; }
 
 // --------- 型定義 ----------
-enum class MotorType { M2006, M3508 };
+enum class MotorType { M2006, M3508 ,LAUNCHER};
 enum class CtrlMode  : uint8_t { CURRENT=0, SPEED=1, POSITION=2 };
 
 struct Pid {
@@ -98,11 +98,15 @@ static inline void setup_pid(MotorState& m, const Gains& g) {
 static inline Gains default_gains_for(MotorType t) {
     Gains g{};
     if (t == MotorType::M3508) {
-        g.pos = { 300.f, 0.0f, 10.f,  -3000.f, 3000.f };
+        g.pos = { 300.f, 0.0f, 10.f,  -9000.f, 9000.f };
         g.spd = { 0.0200f, 0.0030f, 0.0f,  -18.f, 18.f };
-    } else { // M2006
+    } else if(t == MotorType::M2006) { // M2006
         g.pos = { 300.f, 0.0f, 10.f,  -10000.f, 10000.f };
         g.spd = { 0.0200f, 0.0030f, 0.0f,  -12.f, 12.f };
+    }
+    else if(t == MotorType::LAUNCHER){
+        g.pos = { 300.f, 0.0f, 10.f,  -3000.f, 3000.f };
+        g.spd = { 0.001f, 0.001f, 0.0f,  -12.f, 12.f };
     }
     return g;
 }
@@ -263,6 +267,7 @@ static inline bool ieq(const std::string& a, const std::string& b) {
 static inline std::optional<MotorType> motor_type_from(const std::string& s) {
     if (ieq(s,"M3508")) return MotorType::M3508;
     if (ieq(s,"M2006")) return MotorType::M2006;
+    if (ieq(s,"LAUNCHER")) return MotorType::LAUNCHER;
     return std::nullopt;
 }
 
@@ -285,6 +290,7 @@ public:
 
     Gains gains_m3508_{ default_gains_for(MotorType::M3508) };
     Gains gains_m2006_{ default_gains_for(MotorType::M2006) };
+    Gains gains_launcher{default_gains_for(MotorType::LAUNCHER)};
 
 private:
     void on_cmd_array(const robomas_driver::msg::MotorCmdArray::SharedPtr msg) {
@@ -310,7 +316,16 @@ private:
             M[idx].mode.store(*md);
 
             // タイプ変更時：対応ゲインを即反映（積分もリセット）
-            setup_pid(M[idx], (*mt == MotorType::M3508) ? gains_m3508_ : gains_m2006_);
+            // setup_pid(M[idx], (*mt == MotorType::M3508) ? gains_m3508_ : gains_m2006_);
+            if(*mt == MotorType::M3508){
+                setup_pid(M[idx], gains_m3508_);
+            }
+            else if(*mt == MotorType::M2006){
+                setup_pid(M[idx], gains_m2006_);
+            }
+            else if(*mt == MotorType::LAUNCHER){
+                setup_pid(M[idx], gains_launcher);
+            }
 
             M[idx].target.store(c.value);
         }
