@@ -81,11 +81,11 @@ private:
         if(!a_button_pushing_){
           a_button_pushing_ = true;
           if(this->tsubarobo_launcher.get_is_rolling()){//rolling中なら止める
-            robomas_pub_1->publish(this->tsubarobo_launcher.update(false,dt));
+            robomas_pub_1->publish(this->tsubarobo_launcher.update(false));
             RCLCPP_INFO(this->get_logger(),"stop rolling");
           }
           else{//rollingしていないなら始める
-            robomas_pub_1->publish(this->tsubarobo_launcher.update(true,dt));
+            robomas_pub_1->publish(this->tsubarobo_launcher.update(true));
             RCLCPP_INFO(this->get_logger(),"start rolling");
           }
         }

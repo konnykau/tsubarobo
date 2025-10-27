@@ -39,12 +39,12 @@ class launcher{
         }
         return std::make_unique<robomas_driver::msg::MotorCmdArray>(TARGET_FRAME);
     }//make_robomas_Frame
-    void roll_launcher(double dt){
+    void roll_launcher(){
         if(this->is_rolling_){
-            this->set_target(rolling_velocity_,dt);
+            this->set_target(rolling_velocity_);
         }
         else{
-            this->set_target(0.0,dt);
+            this->set_target(0.0);
         }
     }//roll_launcher
     
@@ -58,7 +58,7 @@ class launcher{
     :logger_(rclcpp::get_logger("launcher")),TARGET(0),id_{4,5},rolling_direction{true,false},is_rolling_(false),MODE(motor_mode::disable)
     {}//初期化
 
-    void set_target(float power,double dt){
+    void set_target(float power){
         this->TARGET = power;
     }//TARGETを代入
     
@@ -66,9 +66,9 @@ class launcher{
         this->MODE = motor_state;
     }//modeを設定
 
-    std::unique_ptr<robomas_driver::msg::MotorCmdArray> update(bool rolling_state,double dt){
+    std::unique_ptr<robomas_driver::msg::MotorCmdArray> update(bool rolling_state){
         this->set_rolling(rolling_state);
-        this->roll_launcher(dt);
+        this->roll_launcher();
         return this->make_robomas_Frame();
     }//他の関数を全部融合させた
 
